@@ -1,23 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
 
 function App() {
+  const [query, setQuery] = React.useState("");
+  const [count, setCount] = React.useState(0);
+  const [caughtCount, setCaughtCount] = React.useState(0);
+
+  const handleRequest = (counter) => {
+    console.log(count, caughtCount);
+    caughtCount === count && caughtCount != 0 && count != 0
+      ? console.log("Calling from GitHub")
+      : console.log("never mind");
+
+    setCount(1);
+    setCaughtCount(1);
+  };
+
+  const handleTextChange = (e) => {
+    e.preventDefault();
+    setQuery(e.target.value);
+    setCount(count + 1);
+    setTimeout(() => {
+      setCaughtCount(caughtCount + 1);
+      handleRequest(count);
+    }, 300);
+
+    console.log(query);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <input
+        type="text"
+        name="song"
+        // placeholder="Search for an album..."
+        value={query}
+        onChange={(e) => handleTextChange(e)}
+      />
     </div>
   );
 }
