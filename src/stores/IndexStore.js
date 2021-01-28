@@ -6,7 +6,8 @@ import { extendObservable } from "mobx";
 class IndexStore {
   constructor() {
     extendObservable(this, {
-      index: [0]
+      index: [0],
+      cache: new Set(),
     });
   }
 }
