@@ -1,14 +1,20 @@
+// REACT LIBRARY IMPORTS
 import React, { useEffect, useContext } from "react";
+
+// GLOBAL STORE INPUTS
 import { IndexContext } from "../IndexContext";
 import IndexStore from "../stores/IndexStore";
 import { observer } from "mobx-react";
 
+// DATA FETCHING IMPORTS
 import useSWR from "swr";
 
+/* ------------------------------------- */
+
+// MY ACCESS TOKEN WILL ALLOW FOR 1000 REQUESTS / HR
 const PERSONAL_ACCESS_TOKEN = "3a8b2a73d5047eda6b1f7b61c5da338546edb7ce";
 
-// let cache = new Set();
-
+// FETCHER HANDLER FOR USESWR LIBRARY
 const fetcher = (...args) =>
   fetch(...args, {
     method: "get",
@@ -18,38 +24,51 @@ const fetcher = (...args) =>
   }).then((res) => res.json());
 
 function Interface() {
-  const [query, setQuery] = React.useState("");
-  const [term, setTerm] = React.useState("");
-  const [count, setCount] = React.useState(0);
+  // USESTATE DECLARATIONS
   const [caughtCount, setCaughtCount] = React.useState(0);
   const [called, setCalled] = React.useState(false);
-  const [result, setResult] = React.useState(new Set());
+  const [query, setQuery] = React.useState("");
+  const [count, setCount] = React.useState(0);
+  const [term, setTerm] = React.useState("");
 
+  // USECONTEXT DECLARATIONS
   const { value, setValue } = useContext(IndexContext);
 
-  const { data, error } = useSWR(
-    `https://api.github.com/users/${term}`,
-    fetcher
-  );
-
+  // USEEFFECT DECLARTIONS
   useEffect(() => {
-    const item = {
-      user: JSON.stringify(data),
-      image: JSON.stringify(data),
-    };
-
     if (data && data.login) {
       const item = {
         user: data.login,
         image: data.avatar_url,
       };
-
-      IndexStore.cache.add(JSON.stringify(item));
-      // console.log(cache);
+      IndexStore.cache.add(JSON.stringify(item)); // SERIALISE OBJECT TO ENSURE NON-DUPLICATE VALUES IN SET
     }
-  }, [() => term]);
+  }, [() => term]); // CALLBACK DEPENDENCY DUE TO ASYNC NATURE OF SETTIMEOUT
 
-  const handleRequest = (counter, query) => {
+  // USESWR DECLARATIONS
+  const { data, error } = useSWR(
+    `https://api.github.com/users/${term}`,
+    fetcher
+  );
+
+  // METHOD TO HANDLE INPUT TEXT CHANGE
+  const handleTextChange = (e) => {
+    e.preventDefault();
+
+    const searchQuery = e.target.value;
+
+    IndexStore.index.push(searchQuery.length);
+
+    setQuery(e.target.value);
+    setCount(count + 1);
+    setTimeout(() => {
+      setCaughtCount(caughtCount + 1);
+      handleRequest(searchQuery);
+    }, 300);
+  };
+
+  // REQUESTS ENGINE
+  const handleRequest = (query) => {
     const index = query.length;
 
     if (caughtCount === count && caughtCount != 0 && count != 0) {
@@ -74,22 +93,6 @@ function Interface() {
     setCalled(false);
   };
 
-  const handleTextChange = (e) => {
-    e.preventDefault();
-
-    const searchQuery = e.target.value;
-
-    IndexStore.index.push(searchQuery.length);
-    // console.log(IndexStore.index, "contetr");
-
-    setQuery(e.target.value);
-    setCount(count + 1);
-    setTimeout(() => {
-      setCaughtCount(caughtCount + 1);
-      handleRequest(count, searchQuery);
-    }, 300);
-  };
-
   if (error) return <h1>error</h1>;
 
   return (
@@ -101,35 +104,27 @@ function Interface() {
         value={query}
         onChange={(e) => handleTextChange(e)}
       />
-      {/* <div className="divider"/> */}
 
       <div>
         {[...IndexStore.cache]
-        .filter((item) => {
-          if (JSON.parse(item).user.toLowerCase().includes(term.toLowerCase())) {
-            return JSON.parse(item).user;
-          }
-        })
-        .map((item) => (
-          <div className="drop-down-item-container">
-            <div className="image-container">
-              <img src={JSON.parse(item).image} className="profile-image" />
+          .filter((item) => {
+            if (
+              JSON.parse(item).user.toLowerCase().includes(term.toLowerCase())
+            ) {
+              return JSON.parse(item).user;
+            }
+          })
+          .map((item) => (
+            <div className="drop-down-item-container">
+              <div className="image-container">
+                <img src={JSON.parse(item).image} className="profile-image" />
+              </div>
+              <div className="user-name-container">
+                <h1>{JSON.parse(item).user}</h1>
+              </div>
             </div>
-            <div className="user-name-container">
-              <h1>{JSON.parse(item).user}</h1>
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
-
-      {/* <div className="drop-down-item-container">
-        <div className="image-container">
-          <img src={data ? data.avatar_url : null} className="profile-image" />
-        </div>
-        <div className="user-name-container">
-          <h1>{data ? data.login : null}</h1>
-        </div>
-      </div> */}
     </div>
   );
 }
