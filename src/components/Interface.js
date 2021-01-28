@@ -72,22 +72,29 @@ function Interface() {
     const index = query.length;
 
     if (caughtCount === count && caughtCount != 0 && count != 0) {
-      // console.log("Calling from GitHub", index);
-      setTerm(query);
+      // TIME TO MAKE A REQUEST
+      // ENGINE DOES NOT MAKE REQUEST IF THE USER IS ALREADY IN CACHE
+      if (!IndexStore.cache.has(query)) {
+        setTerm(query);
+      }
       setCalled(true);
     } else {
       setCalled(false);
-      // console.log("never mind", index);
+      // USER IS TYPING TOO FAST. NO NEED TO MAKE A REQUEST
       setTimeout(() => {
         if (!called) {
           if (index === IndexStore.index[IndexStore.index.length - 1]) {
-            // console.log("Calling from GitHub-2", index);
-            setTerm(query);
+            // TIME TO MAKE A REQUEST
+            // ENGINE DOES NOT MAKE REQUEST IF THE USER IS ALREADY IN CACHE
+            if (!IndexStore.cache.has(query)) {
+              setTerm(query);
+            }
           }
         }
       }, [1000]);
     }
 
+    //  RESET HOOKS FOR NEXT INPUT CHANGE CYCLE
     setCount(1);
     setCaughtCount(1);
     setCalled(false);
@@ -96,16 +103,22 @@ function Interface() {
   if (error) return <h1>error</h1>;
 
   return (
-    <div>
-      <input
-        type="text"
-        name="song"
-        placeholder="Search for GitHub users..."
-        value={query}
-        onChange={(e) => handleTextChange(e)}
-      />
+    <div className="top-level-container">
+      <div className="header">
+        <input
+          type="text"
+          name="song"
+          placeholder="Search for GitHub users..."
+          value={query}
+          onChange={(e) => handleTextChange(e)}
+        />
+      </div>
 
-      <div>
+      <div className="body">
+        {(term.toLowerCase() === "" && [...IndexStore.cache]).length > 0 ? (
+          <h1>history</h1>
+        ) : null}
+
         {[...IndexStore.cache]
           .filter((item) => {
             if (
@@ -114,17 +127,29 @@ function Interface() {
               return JSON.parse(item).user;
             }
           })
-          .map((item) => (
-            <div className="drop-down-item-container">
-              <div className="image-container">
-                <img src={JSON.parse(item).image} className="profile-image" />
-              </div>
-              <div className="user-name-container">
-                <h1>{JSON.parse(item).user}</h1>
-              </div>
-            </div>
-          ))}
+          .map((item) => {
+            if (!data) {
+              return <h1>loading</h1>;
+            } else
+              return (
+                <div className="drop-down-item-container">
+                  <div className="image-container">
+                    <img
+                      src={JSON.parse(item).image}
+                      className="profile-image"
+                    />
+                  </div>
+                  <div className="user-name-container">
+                    <h1>{JSON.parse(item).user}</h1>
+                  </div>
+                </div>
+              );
+          })}
       </div>
+
+      {/* <div className="footer">
+          <h1>footer</h1>
+      </div> */}
     </div>
   );
 }

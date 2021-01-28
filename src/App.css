@@ -1,4 +1,41 @@
 /* TOP LEVEL STYLES */
+.top-level-container {
+  background-color: #84D78F;
+  height: 100vh;
+  display : flex;
+  flex-direction: column;
+}
+
+.header {
+  background-color: red;
+  height: 10vh;
+  flex : 1;
+  display: flex;
+  padding : 5vh
+}
+
+.header input {
+  flex : 1;
+  border-radius: 0.5rem;
+  box-shadow: 10px 10px grey;
+  text-align: center;
+  font-size : 30px;
+  font-weight: bold;
+  text-transform : uppercase;
+  border : none
+}
+
+.body {
+  background-color: blue;
+  height: 80vh;
+  flex : 5
+}
+
+.footer {
+  background-color: yellow;
+  height: 10vh;
+  grid-area : footer
+}
 
 
 /* DROPDOWN ITEM STYLES */
@@ -7,11 +44,20 @@
   background-color: red;
 }
 
-
 .image-container {
+  display: flex;
   flex : 1;
-  background-color: blue;
+  align-items : center;
+  background-color: pink;
 }
+
+.image-container img {
+  /* align-items:   center; */
+}
+
+
+
+
 
 .user-name-container {
   flex : 4;
